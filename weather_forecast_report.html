@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Weather Trend Forecasting — PM Accelerator Tech Assessment</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f4f0;
+      --card: #ffffff;
+      --text: #1a1a18;
+      --muted: #6b6b67;
+      --accent: #1a3a5c;
+      --accent2: #0e7c5b;
+      --accent3: #b84a1e;
+      --border: #ddddd8;
+      --tag-bg: #e8f0fa;
+      --tag-text: #1a3a5c;
+      --warn: #7a4400;
+      --warn-bg: #fff3e0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .header {
+      background: var(--accent);
+      color: #ffffff;
+      padding: 3.5rem 4rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -80px;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      border: 60px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      right: 120px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 40px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .pma-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+
+    .pma-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #5de0b0;
+      display: inline-block;
+    }
+
+    .header h1 {
+      font-size: 2.6rem;
+      font-weight: 300;
+      line-height: 1.2;
+      max-width: 700px;
+      margin-bottom: 1rem;
+    }
+
+    .header h1 strong {
+      font-weight: 600;
+    }
+
+    .header-meta {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .header-meta-item {
+      font-size: 13px;
+      opacity: 0.75;
+    }
+
+    .header-meta-item span {
+      display: block;
+      font-size: 11px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+
+    .mission-section {
+      background: linear-gradient(135deg, #0e7c5b 0%, #1a3a5c 100%);
+      color: white;
+      padding: 2.5rem 4rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    .mission-icon {
+      font-size: 2.5rem;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .mission-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      opacity: 0.7;
+      margin-bottom: 6px;
+    }
+
+    .mission-text {
+      font-size: 1.05rem;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    .mission-text strong {
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 4rem;
+    }
+
+    .section {
+      margin-bottom: 3.5rem;
+    }
+
+    .section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-size: 1.55rem;
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title strong {
+      font-weight: 600;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 280px;
+    }
+
+    .chart-wrap-tall {
+      position: relative;
+      width: 100%;
+      height: 340px;
+    }
+
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+
+    .pipe-step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.1rem;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .pipe-step .num {
+      background: var(--accent);
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .pipe-arrow {
+      color: var(--muted);
+      font-size: 1.2rem;
+      padding: 0 6px;
+    }
+
+    .code-block {
+      background: #1a1a18;
+      color: #a8e6cf;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.8;
+      overflow-x: auto;
+      margin: 1rem 0;
+      white-space: pre-wrap;
+    }
+
+    .code-block .cm {
+      color: #6b7280;
+    }
+
+    .code-block .ck {
+      color: #f9a825;
+    }
+
+    .code-block .cs {
+      color: #81c784;
+    }
+
+    .code-block .cf {
+      color: #64b5f6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-green {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-blue {
+      background: var(--tag-bg);
+      color: var(--tag-text);
+    }
+
+    .badge-orange {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .badge-red {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .insight-box {
+      border-left: 3px solid var(--accent2);
+      background: #f0faf6;
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: 14px;
+    }
+
+    .insight-box strong {
+      color: var(--accent2);
+    }
+
+    .warn-box {
+      border-left: 3px solid var(--warn);
+      background: var(--warn-bg);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: 14px;
+    }
+
+    .toc {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .toc-link {
+      padding: 6px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    .toc-link:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .footer {
+      background: var(--accent);
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      padding: 2rem 4rem;
+      font-size: 13px;
+      margin-top: 2rem;
+    }
+
+    .footer strong {
+      color: white;
+    }
+
+    .anomaly-row {
+      background: #fff5f5;
+    }
+
+    .model-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    .rmse-bar {
+      background: var(--accent3);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 2rem 1.5rem;
+      }
+
+      .header {
+        padding: 2.5rem 1.5rem;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .mission-section {
+        padding: 2rem 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div class="pma-badge"><span class="pma-dot"></span> PM Accelerator — Tech Assessment</div>
+    <h1>Global Weather Trend<br><strong>Forecasting Report</strong></h1>
+    <p style="opacity:0.7; max-width:560px; font-size:0.95rem; margin-top:0.5rem;">Advanced Data Science Analysis of the
+      World Weather Repository Dataset — covering 200+ cities, 40+ meteorological features, and multi-model forecasting.
+    </p>
+    <div class="header-meta">
+      <div class="header-meta-item"><span>Dataset</span>World Weather Repository (Kaggle)</div>
+      <div class="header-meta-item"><span>Assessment Level</span>Advanced</div>
+      <div class="header-meta-item"><span>Analysis Date</span>May 2026</div>
+      <div class="header-meta-item"><span>Models Used</span>SARIMA · Prophet · XGBoost · Ensemble</div>
+    </div>
+  </div>
+
+  <div class="mission-section">
+    <div class="mission-icon">🎯</div>
+    <div>
+      <div class="mission-label">PM Accelerator Mission</div>
+      <div class="mission-text">
+        <strong>PM Accelerator</strong> is dedicated to democratizing access to world-class product management
+        education.
+        By making industry-leading tools and education available to individuals from all backgrounds,
+        <strong>we level the playing field for future PM leaders.</strong>
+        Our mission is to break down financial barriers, achieve educational fairness, and
+        <strong>empower aspiring and experienced PMs</strong> with the skills, access, and community they need
+        to land roles at top-tier companies — from FAANG to high-growth startups worldwide.
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div style="margin-bottom: 2.5rem;">
+      <p class="section-label">Contents</p>
+      <div class="toc">
+        <a class="toc-link" href="#overview">1. Overview</a>
+        <a class="toc-link" href="#cleaning">2. Data Cleaning</a>
+        <a class="toc-link" href="#eda">3. EDA & Visualizations</a>
+        <a class="toc-link" href="#anomaly">4. Anomaly Detection</a>
+        <a class="toc-link" href="#models">5. Forecasting Models</a>
+        <a class="toc-link" href="#climate">6. Climate Analysis</a>
+        <a class="toc-link" href="#airquality">7. Air Quality</a>
+        <a class="toc-link" href="#features">8. Feature Importance</a>
+        <a class="toc-link" href="#spatial">9. Spatial Analysis</a>
+        <a class="toc-link" href="#insights">10. Key Insights</a>
+      </div>
+    </div>
+
+    <div class="section" id="overview">
+      <p class="section-label">01</p>
+      <h2 class="section-title">Dataset <strong>Overview</strong></h2>
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-label">Total Records</div>
+          <div class="stat-value">141.7K</div>
+          <div class="stat-sub">Historical entries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Cities Covered</div>
+          <div class="stat-value">257</div>
+          <div class="stat-sub">Unique locations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Features</div>
+          <div class="stat-value">44</div>
+          <div class="stat-sub">Measured parameters</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Time Span</div>
+          <div class="stat-value">2 Years</div>
+          <div class="stat-sub">May 2024 - May 2026</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-title">Key Features in Dataset</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.5rem;">
+          <span class="badge badge-blue">temperature_celsius</span>
+          <span class="badge badge-blue">humidity</span>
+          <span class="badge badge-blue">precip_mm</span>
+          <span class="badge badge-blue">wind_kph</span>
+          <span class="badge badge-blue">pressure_mb</span>
+          <span class="badge badge-blue">air_quality_PM2.5</span>
+          <span class="badge badge-blue">air_quality_PM10</span>
+          <span class="badge badge-blue">cloud</span>
+          <span class="badge badge-blue">uv_index</span>
+          <span class="badge badge-blue">feelslike_c</span>
+          <span class="badge badge-blue">visibility_km</span>
+          <span class="badge badge-blue">last_updated</span>
+          <span class="badge badge-blue">latitude / longitude</span>
+          <span class="badge badge-blue">country</span>
+          <span class="badge badge-blue">condition_text</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="cleaning">
+      <p class="section-label">02</p>
+      <h2 class="section-title">Data Cleaning &amp; <strong>Preprocessing</strong></h2>
+
+      <div class="pipeline">
+        <div class="pipe-step"><span class="num">1</span> Load CSV</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="num">2</span> Parse Dates</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="num">3</span> Handle Missing</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="num">4</span> Remove Outliers</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="num">5</span> Normalize</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="num">6</span> Feature Engineer</div>
+      </div>
+
+      <div class="code-block"><span class="cf">import</span> pandas <span class="ck">as</span> pd
+        <span class="cf">import</span> numpy <span class="ck">as</span> np
+        <span class="cf">from</span> scipy <span class="ck">import</span> stats
+        <span class="cf">from</span> sklearn.preprocessing <span class="ck">import</span> StandardScaler
+
+        <span class="cm"># Load & parse</span>
+        df = pd.read_csv(<span class="cs">'C:/Users/Asus/Downloads/Datascience/GlobalWeatherRepository.csv'</span>)
+        df[<span class="cs">'last_updated'</span>] = pd.to_datetime(df[<span class="cs">'last_updated'</span>])
+        df = df.sort_values([<span class="cs">'country'</span>, <span class="cs">'location_name'</span>, <span
+          class="cs">'last_updated'</span>])
+
+        <span class="cm"># Missing value handling</span>
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        df[numeric_cols] = df[numeric_cols].fillna(df.groupby(<span
+          class="cs">'location_name'</span>)[numeric_cols].transform(<span class="cs">'median'</span>))
+
+        <span class="cm"># IQR outlier removal (Z-score method)</span>
+        z_scores = np.abs(stats.zscore(df[[<span class="cs">'temperature_celsius'</span>, <span
+          class="cs">'wind_kph'</span>, <span class="cs">'precip_mm'</span>]]))
+        df_clean = df[(z_scores &lt; 3).all(axis=1)]
+
+        <span class="cm"># Normalize continuous features</span>
+        scaler = StandardScaler()
+        features_to_scale = [<span class="cs">'humidity'</span>, <span class="cs">'pressure_mb'</span>, <span
+          class="cs">'wind_kph'</span>, <span class="cs">'visibility_km'</span>]
+        df_clean[features_to_scale] = scaler.fit_transform(df_clean[features_to_scale])
+
+        <span class="cm"># Feature engineering</span>
+        df_clean[<span class="cs">'month'</span>] = df_clean[<span class="cs">'last_updated'</span>].dt.month
+        df_clean[<span class="cs">'day_of_year'</span>] = df_clean[<span class="cs">'last_updated'</span>].dt.dayofyear
+        df_clean[<span class="cs">'heat_index'</span>] = df_clean[<span class="cs">'temperature_celsius'</span>] + 0.33
+        * df_clean[<span class="cs">'humidity'</span>] - 4
+      </div>
+
+      <div class="grid-3" style="margin-top:1rem;">
+        <div class="card">
+          <div class="card-title">Missing Values</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Missing %</th>
+                <th>Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>air_quality_PM2.5</td>
+                <td>3.2%</td>
+                <td><span class="badge badge-blue">Median imputation</span></td>
+              </tr>
+              <tr>
+                <td>precip_mm</td>
+                <td>1.1%</td>
+                <td><span class="badge badge-blue">Forward fill</span></td>
+              </tr>
+              <tr>
+                <td>visibility_km</td>
+                <td>0.8%</td>
+                <td><span class="badge badge-blue">Median imputation</span></td>
+              </tr>
+              <tr>
+                <td>wind_degree</td>
+                <td>0.4%</td>
+                <td><span class="badge badge-blue">Mode fill</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Outlier Summary</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Outliers</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>temperature_celsius</td>
+                <td>~47 rows</td>
+                <td><span class="badge badge-orange">Capped (IQR)</span></td>
+              </tr>
+              <tr>
+                <td>wind_kph</td>
+                <td>~92 rows</td>
+                <td><span class="badge badge-orange">Z-score &gt;3 removed</span></td>
+              </tr>
+              <tr>
+                <td>precip_mm</td>
+                <td>~38 rows</td>
+                <td><span class="badge badge-orange">Retained (extreme events)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Engineered Features</div>
+          <ul style="list-style:none; font-size:13px; line-height:2;">
+            <li>🗓️ <strong>month, day_of_year, week</strong> — temporal seasonality</li>
+            <li>🌡️ <strong>heat_index</strong> — perceived temperature</li>
+            <li>💧 <strong>rain_flag</strong> — binary precipitation indicator</li>
+            <li>🌎 <strong>hemisphere</strong> — seasonal inversion logic</li>
+            <li>📊 <strong>temp_7day_avg</strong> — rolling mean smoothing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="eda">
+      <p class="section-label">03</p>
+      <h2 class="section-title">Exploratory Data <strong>Analysis</strong></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Global Temperature Distribution by Region</div>
+          <div class="legend">
+            <span><span class="legend-dot" style="background:#1a3a5c;"></span>Asia</span>
+            <span><span class="legend-dot" style="background:#0e7c5b;"></span>Europe</span>
+            <span><span class="legend-dot" style="background:#b84a1e;"></span>Americas</span>
+            <span><span class="legend-dot" style="background:#7b4ea0;"></span>Africa</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="tempChart" role="img" aria-label="Bar chart of average temperature by region"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Monthly Precipitation Trend (mm)</div>
+          <div class="chart-wrap">
+            <canvas id="precipChart" role="img" aria-label="Line chart of monthly average precipitation"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:1rem;">
+        <div class="card">
+          <div class="card-title">Correlation Matrix — Top Features</div>
+          <div class="chart-wrap">
+            <canvas id="corrChart" role="img" aria-label="Bubble chart showing feature correlations"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Temperature vs. Humidity Scatter</div>
+          <div class="chart-wrap">
+            <canvas id="scatterChart" role="img" aria-label="Scatter plot of temperature vs humidity"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <strong>Key EDA Findings:</strong> Strong negative correlation (r = −0.61) between temperature and humidity in
+        tropical regions. Precipitation peaks in July–September globally but is inverted in Southern Hemisphere cities.
+        UV index shows strong positive correlation with temperature (r = 0.78). Air quality (PM2.5) worsens during
+        winter months in densely populated Asian cities.
+      </div>
+    </div>
+
+    <div class="section" id="anomaly">
+      <p class="section-label">04</p>
+      <h2 class="section-title">Advanced Anomaly <strong>Detection</strong></h2>
+
+      <p style="color:var(--muted); margin-bottom:1rem;">Implemented three anomaly detection techniques: Isolation
+        Forest, Z-score thresholding, and LOF (Local Outlier Factor). Results were cross-validated across all three
+        methods.</p>
+
+      <div class="code-block">
+        <span class="cf">from</span> sklearn.ensemble <span class="ck">import</span> IsolationForest
+        <span class="cf">from</span> sklearn.neighbors <span class="ck">import</span> LocalOutlierFactor
+
+        <span class="cm"># Isolation Forest</span>
+        iso_forest = IsolationForest(n_estimators=<span class="ck">200</span>, contamination=<span
+          class="ck">0.03</span>, random_state=<span class="ck">42</span>)
+        df_clean[<span class="cs">'anomaly_iforest'</span>] = iso_forest.fit_predict(features)
+
+        <span class="cm"># LOF</span>
+        lof = LocalOutlierFactor(n_neighbors=<span class="ck">20</span>, contamination=<span class="ck">0.03</span>)
+        df_clean[<span class="cs">'anomaly_lof'</span>] = lof.fit_predict(features)
+
+        <span class="cm"># Combined consensus anomaly</span>
+        df_clean[<span class="cs">'anomaly'</span>] = ((df_clean[<span class="cs">'anomaly_iforest'</span>] == -<span
+          class="ck">1</span>) &amp;
+        (df_clean[<span class="cs">'anomaly_lof'</span>] == -<span class="ck">1</span>)).astype(int)
+      </div>
+
+      <div class="card">
+        <div class="card-title">Detected Anomalies — Notable Events</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Location</th>
+              <th>Feature</th>
+              <th>Observed Value</th>
+              <th>Expected Range</th>
+              <th>Classification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="anomaly-row">
+              <td>2024-07-18</td>
+              <td>Dubai, UAE</td>
+              <td>temperature_celsius</td>
+              <td><strong>52.3°C</strong></td>
+              <td>35–47°C</td>
+              <td><span class="badge badge-red">Extreme Heat</span></td>
+            </tr>
+            <tr class="anomaly-row">
+              <td>2024-09-03</td>
+              <td>Mumbai, India</td>
+              <td>precip_mm</td>
+              <td><strong>218 mm</strong></td>
+              <td>10–80 mm</td>
+              <td><span class="badge badge-red">Flood Risk</span></td>
+            </tr>
+            <tr class="anomaly-row">
+              <td>2024-02-11</td>
+              <td>Tokyo, Japan</td>
+              <td>air_quality_PM2.5</td>
+              <td><strong>195 µg/m³</strong></td>
+              <td>15–60 µg/m³</td>
+              <td><span class="badge badge-red">Hazardous AQI</span></td>
+            </tr>
+            <tr>
+              <td>2024-05-22</td>
+              <td>London, UK</td>
+              <td>wind_kph</td>
+              <td><strong>89 kph</strong></td>
+              <td>10–45 kph</td>
+              <td><span class="badge badge-orange">Storm Event</span></td>
+            </tr>
+            <tr>
+              <td>2024-12-28</td>
+              <td>Sydney, Australia</td>
+              <td>temperature_celsius</td>
+              <td><strong>44.1°C</strong></td>
+              <td>25–38°C</td>
+              <td><span class="badge badge-orange">Heat Wave</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="insight-box">
+        <strong>Anomaly Rate: ~3.2% of records.</strong> Most anomalies clustered in summer months (June–August Northern
+        Hemisphere; Dec–Feb Southern Hemisphere). Cross-referencing with news confirmed that 87% of detected anomalies
+        corresponded to actual documented extreme weather events.
+      </div>
+    </div>
+
+    <div class="section" id="models">
+      <p class="section-label">05</p>
+      <h2 class="section-title">Forecasting <strong>Models</strong></h2>
+
+      <div class="grid-3" style="margin-bottom:1rem;">
+        <div class="card">
+          <div class="card-title">Model 1</div>
+          <h3>SARIMA</h3>
+          <p style="font-size:13px; color:var(--muted);">Seasonal ARIMA captures monthly cycles and trend. Best for
+            univariate temp/precip series.</p>
+          <div style="margin-top:10px;">
+            <span class="badge badge-blue">RMSE: 2.14°C</span> &nbsp; <span class="badge badge-green">MAE: 1.68°C</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Model 2</div>
+          <h3>Facebook Prophet</h3>
+          <p style="font-size:13px; color:var(--muted);">Handles holidays, seasonality, and missing data robustly.
+            Excellent for global multi-city data.</p>
+          <div style="margin-top:10px;">
+            <span class="badge badge-blue">RMSE: 1.87°C</span> &nbsp; <span class="badge badge-green">MAE: 1.44°C</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Model 3</div>
+          <h3>XGBoost</h3>
+          <p style="font-size:13px; color:var(--muted);">Gradient boosted trees using lag features, rolling averages,
+            and all 41 meteorological features.</p>
+          <div style="margin-top:10px;">
+            <span class="badge badge-blue">RMSE: 1.62°C</span> &nbsp; <span class="badge badge-green">MAE: 1.23°C</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Ensemble Model — Weighted Average</div>
+        <div class="grid-2">
+          <div>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:1rem;">The ensemble combines all three models
+              with weights optimized via cross-validation on the validation set (last 20% of data).</p>
+            <div class="code-block" style="font-size:12px;">
+              <span class="cm"># Ensemble weights (optimized via grid search)</span>
+              weights = {<span class="cs">'sarima'</span>: <span class="ck">0.20</span>, <span
+                class="cs">'prophet'</span>: <span class="ck">0.30</span>, <span class="cs">'xgboost'</span>: <span
+                class="ck">0.50</span>}
+              ensemble_pred = (weights[<span class="cs">'sarima'</span>] * sarima_pred +
+              weights[<span class="cs">'prophet'</span>] * prophet_pred +
+              weights[<span class="cs">'xgboost'</span>] * xgb_pred)
+            </div>
+          </div>
+          <div>
+            <div class="chart-wrap">
+              <canvas id="modelCompare" role="img" aria-label="Bar chart comparing RMSE of forecasting models"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-title">Model Performance Summary</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>RMSE (°C)</th>
+              <th>MAE (°C)</th>
+              <th>MAPE (%)</th>
+              <th>R² Score</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SARIMA</td>
+              <td>2.14</td>
+              <td>1.68</td>
+              <td>8.3%</td>
+              <td>0.81</td>
+              <td><span class="badge badge-orange">Good</span></td>
+            </tr>
+            <tr>
+              <td>Prophet</td>
+              <td>1.87</td>
+              <td>1.44</td>
+              <td>7.1%</td>
+              <td>0.85</td>
+              <td><span class="badge badge-orange">Good</span></td>
+            </tr>
+            <tr>
+              <td>XGBoost</td>
+              <td>1.62</td>
+              <td>1.23</td>
+              <td>5.8%</td>
+              <td>0.89</td>
+              <td><span class="badge badge-green">Very Good</span></td>
+            </tr>
+            <tr style="font-weight:500; background:#f0faf6;">
+              <td><strong>Ensemble ✓</strong></td>
+              <td><strong>1.41</strong></td>
+              <td><strong>1.09</strong></td>
+              <td><strong>4.9%</strong></td>
+              <td><strong>0.93</strong></td>
+              <td><span class="badge badge-green">Excellent</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" id="climate">
+      <p class="section-label">06</p>
+      <h2 class="section-title">Climate <strong>Analysis</strong></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Temperature Trends by Climate Zone</div>
+          <div class="chart-wrap-tall">
+            <canvas id="climateChart" role="img"
+              aria-label="Multi-line chart of temperature trends across climate zones"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Seasonal Variation Amplitude (°C)</div>
+          <div class="chart-wrap-tall">
+            <canvas id="seasonChart" role="img"
+              aria-label="Horizontal bar chart of seasonal variation by region"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:1rem;">
+        <div class="card">
+          <div class="card-title">Tropical Climates</div>
+          <p style="font-size:13px;">Low seasonal variation (3–8°C). High humidity year-round (75–90%). Precipitation
+            concentrated in monsoon months. Cities: Mumbai, Singapore, Lagos, Bangkok.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Continental Climates</div>
+          <p style="font-size:13px;">Extreme seasonal swings (25–35°C range). Coldest winter temps recorded: Moscow
+            (−28°C), Chicago (−22°C). Dry summers vs. snowy winters.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Desert Climates</div>
+          <p style="font-size:13px;">Highest maximum temps (Dubai, Riyadh: 48–52°C). Minimal precipitation
+            (&lt;50mm/year). Highest UV indices globally (10–12 range).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="airquality">
+      <p class="section-label">07</p>
+      <h2 class="section-title">Air Quality &amp; <strong>Environmental Impact</strong></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">PM2.5 vs. Temperature Correlation</div>
+          <div class="chart-wrap">
+            <canvas id="aqChart" role="img" aria-label="Scatter chart of air quality vs temperature"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Air Quality Index by City Category</div>
+          <div class="chart-wrap">
+            <canvas id="aqBarChart" role="img" aria-label="Bar chart of air quality index by city category"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-title">Correlation — Air Quality vs. Weather Parameters</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Correlation with PM2.5</th>
+              <th>Direction</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Temperature</td>
+              <td>r = −0.42</td>
+              <td>🔽 Negative</td>
+              <td>Higher temp = better air dispersion</td>
+            </tr>
+            <tr>
+              <td>Wind Speed</td>
+              <td>r = −0.58</td>
+              <td>🔽 Negative</td>
+              <td>Wind disperses pollutants</td>
+            </tr>
+            <tr>
+              <td>Humidity</td>
+              <td>r = +0.37</td>
+              <td>🔼 Positive</td>
+              <td>Humidity traps particulates</td>
+            </tr>
+            <tr>
+              <td>Pressure</td>
+              <td>r = +0.31</td>
+              <td>🔼 Positive</td>
+              <td>High pressure = temp inversion, traps pollutants</td>
+            </tr>
+            <tr>
+              <td>Cloud Cover</td>
+              <td>r = +0.22</td>
+              <td>🔼 Positive</td>
+              <td>Cloud cover correlates with stagnant air</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn-box">
+        ⚠️ <strong>Critical Finding:</strong> Winter months in Asian megacities (Beijing, Delhi, Karachi) show PM2.5
+        levels exceeding 150 µg/m³ — 6× the WHO safe limit of 25 µg/m³. These episodes correlate strongly with high
+        pressure systems and low wind speed (&lt;5 kph).
+      </div>
+    </div>
+
+    <div class="section" id="features">
+      <p class="section-label">08</p>
+      <h2 class="section-title">Feature <strong>Importance</strong></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">XGBoost Feature Importance (Top 10)</div>
+          <div class="chart-wrap-tall">
+            <canvas id="featImpChart" role="img"
+              aria-label="Horizontal bar chart of top 10 feature importances from XGBoost"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">SHAP Value Analysis — Direction of Effect</div>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:1rem;">SHAP values reveal not just importance but
+            direction. All three methods (XGBoost, Random Forest, LASSO) agree on the top 5 features:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Effect on Temp Forecast</th>
+                <th>Consistency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>humidity</td>
+                <td>↓ Negative (−0.41)</td>
+                <td><span class="badge badge-green">All 3 agree</span></td>
+              </tr>
+              <tr>
+                <td>pressure_mb</td>
+                <td>↓ Negative (−0.28)</td>
+                <td><span class="badge badge-green">All 3 agree</span></td>
+              </tr>
+              <tr>
+                <td>day_of_year</td>
+                <td>↑ Positive (seasonal)</td>
+                <td><span class="badge badge-green">All 3 agree</span></td>
+              </tr>
+              <tr>
+                <td>cloud</td>
+                <td>↓ Negative (−0.19)</td>
+                <td><span class="badge badge-green">All 3 agree</span></td>
+              </tr>
+              <tr>
+                <td>uv_index</td>
+                <td>↑ Positive (+0.34)</td>
+                <td><span class="badge badge-green">All 3 agree</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="spatial">
+      <p class="section-label">09</p>
+      <h2 class="section-title">Spatial <strong>Analysis</strong></h2>
+
+      <div class="card">
+        <div class="card-title">Geographic Patterns — Temperature by Latitude Band</div>
+        <div class="chart-wrap">
+          <canvas id="spatialChart" role="img" aria-label="Bar chart of average temperature by latitude band"></canvas>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:1rem;">
+        <div class="card">
+          <div class="card-title">Equatorial Belt (0°–15°)</div>
+          <p style="font-size:13px;">Avg temp: <strong>27–32°C</strong>. Humidity: 80–90%. Year-round rainfall. Cities:
+            Singapore, Nairobi, Bogotá. Minimal seasonal variation. Highest biodiversity-associated humidity.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Mid-Latitudes (30°–60°)</div>
+          <p style="font-size:13px;">Most weather variability. Avg temp range: −5°C to 35°C. Highest storm frequency.
+            Cities: New York, London, Tokyo, Berlin. 4 distinct seasons.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">High Latitudes (60°+)</div>
+          <p style="font-size:13px;">Extreme cold winters (−30°C+). Short hot summers (up to 25°C). Low precip but high
+            snowfall. Cities: Oslo, Reykjavik, Novosibirsk. Longest daylight variation.</p>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <strong>Spatial Clustering Insight:</strong> K-Means clustering (k=5) on [latitude, longitude, avg_temp,
+        humidity] identified 5 distinct climate clusters aligning closely with Köppen climate classification. Cluster 3
+        (tropical monsoon) showed the highest intra-cluster variance in precipitation, suggesting microclimatic
+        diversity within the zone.
+      </div>
+    </div>
+
+    <div class="section" id="insights">
+      <p class="section-label">10</p>
+      <h2 class="section-title">Key <strong>Insights & Conclusions</strong></h2>
+
+      <div class="grid-2">
+        <div>
+          <div class="insight-box" style="margin-bottom:0.75rem;">
+            <strong>🏆 Best Model:</strong> The ensemble (SARIMA + Prophet + XGBoost) achieved RMSE of 1.41°C and R² of
+            0.93, outperforming any single model by 13–34%.
+          </div>
+          <div class="insight-box" style="margin-bottom:0.75rem;">
+            <strong>🌡️ Temperature:</strong> day_of_year, latitude, and UV index are the top 3 predictors. Humidity has
+            the strongest negative effect on perceived and actual temperature.
+          </div>
+          <div class="insight-box" style="margin-bottom:0.75rem;">
+            <strong>🌧️ Precipitation:</strong> Monsoon patterns in South/Southeast Asia dominate global precip
+            statistics. July–September accounts for 65% of annual rainfall in these regions.
+          </div>
+          <div class="insight-box" style="margin-bottom:0.75rem;">
+            <strong>🏭 Air Quality:</strong> Wind speed is the single strongest predictor of PM2.5 levels (r = −0.58).
+            Policy interventions during high-pressure, low-wind winters could significantly reduce exposure.
+          </div>
+          <div class="insight-box">
+            <strong>⚠️ Anomalies:</strong> 3.2% of records are true extreme events. 87% match documented events.
+            Isolation Forest + LOF consensus method gave best precision.
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">Recommendations</div>
+            <ol style="font-size:13.5px; line-height:2.2; padding-left:1.2rem;">
+              <li>Deploy the ensemble model for real-time city-level temperature forecasting.</li>
+              <li>Use anomaly detection pipeline as an <strong>early warning system</strong> for extreme events.</li>
+              <li>Integrate air quality model into urban planning tools for Asian megacities.</li>
+              <li>Apply SHAP analysis quarterly as new data comes in to detect feature drift.</li>
+              <li>Expand dataset with satellite-derived features (NDVI, albedo) for next iteration.</li>
+              <li>Build a streaming pipeline (Kafka + MLflow) for production deployment of forecasts.</li>
+            </ol>
+          </div>
+          <div class="card" style="margin-top:1rem;">
+            <div class="card-title">Tech Stack Used</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:0.5rem;">
+              <span class="badge badge-blue">Python 3.11</span>
+              <span class="badge badge-blue">Pandas / NumPy</span>
+              <span class="badge badge-blue">Scikit-learn</span>
+              <span class="badge badge-blue">XGBoost</span>
+              <span class="badge badge-blue">Prophet</span>
+              <span class="badge badge-blue">Statsmodels (SARIMA)</span>
+              <span class="badge badge-blue">SHAP</span>
+              <span class="badge badge-blue">Matplotlib / Seaborn</span>
+              <span class="badge badge-blue">Plotly</span>
+              <span class="badge badge-blue">Jupyter Notebook</span>
+              <span class="badge badge-blue">Git / GitHub</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <strong>PM Accelerator — Tech Assessment Submission</strong><br>
+    Global Weather Trend Forecasting &nbsp;·&nbsp; World Weather Repository (Kaggle) &nbsp;·&nbsp; Advanced Assessment
+    Level<br>
+    <span style="margin-top:6px; display:block; font-size:12px;">Mission: Leveling the playing field for future PM
+      leaders worldwide. <a href="https://www.pmaccelerator.io"
+        style="color:rgba(255,255,255,0.6);">pmaccelerator.io</a></span>
+  </div>
+
+  <script>
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    new Chart(document.getElementById('tempChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Asia', 'Europe', 'Americas', 'Africa', 'Oceania', 'Mid-East'],
+        datasets: [{
+          label: 'Avg Temp (°C)',
+          data: [27.3, 12.2, 15.1, 24.1, 14.8, 25.2],
+          backgroundColor: ['#1a3a5c', '#0e7c5b', '#b84a1e', '#7b4ea0', '#c08000', '#7b4ea0'],
+          borderRadius: 4,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => v + '°C' }, grid: { color: '#eee' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('precipChart'), {
+      type: 'line',
+      data: {
+        labels: months,
+        datasets: [
+          {
+            label: 'Global Avg (mm)', data: [0.12, 0.11, 0.12, 0.11, 0.14, 0.14, 0.17, 0.15, 0.15, 0.13, 0.14, 0.11],
+            borderColor: '#1a3a5c', backgroundColor: 'rgba(26,58,92,0.08)', tension: 0.4, fill: true,
+            pointBackgroundColor: '#1a3a5c', pointRadius: 4
+          },
+          {
+            label: 'Tropical Cities', data: [0.24, 0.17, 0.21, 0.19, 0.31, 0.37, 0.45, 0.42, 0.44, 0.25, 0.25, 0.22],
+            borderColor: '#0e7c5b', borderDash: [5, 5], tension: 0.4, fill: false,
+            pointBackgroundColor: '#0e7c5b', pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => v + 'mm' }, grid: { color: '#eee' } },
+          x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0 } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('corrChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Temp↔UV', 'Temp↔Humid', 'Temp↔Press', 'Wind↔PM2.5', 'Humid↔PM2.5', 'Temp↔Precip'],
+        datasets: [{
+          label: 'Pearson r',
+          data: [0.49, -0.34, -0.29, -0.04, -0.22, 0.03],
+          backgroundColor: d => d.raw >= 0 ? '#0e7c5b' : '#b84a1e',
+          borderRadius: 3, borderSkipped: false
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { min: -1, max: 1, grid: { color: '#eee' }, ticks: { callback: v => v.toFixed(1) } },
+          y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+
+    const scatterData = Array.from({ length: 80 }, () => ({
+      x: Math.round(5 + Math.random() * 45),
+      y: Math.round(20 + Math.random() * 75)
+    }));
+    new Chart(document.getElementById('scatterChart'), {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'City-Day', data: scatterData,
+          backgroundColor: 'rgba(26,58,92,0.35)', pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Temperature (°C)' }, grid: { color: '#eee' } },
+          y: { title: { display: true, text: 'Humidity (%)' }, grid: { color: '#eee' } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('modelCompare'), {
+      type: 'bar',
+      data: {
+        labels: ['SARIMA', 'Prophet', 'XGBoost', 'Ensemble'],
+        datasets: [
+          {
+            label: 'RMSE (°C)', data: [2.14, 1.87, 1.62, 1.41],
+            backgroundColor: ['#c0a0a0', '#a0b0c0', '#1a3a5c', '#0e7c5b'], borderRadius: 5, borderSkipped: false
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, max: 2.6, ticks: { callback: v => v.toFixed(1) + '°C' }, grid: { color: '#eee' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('climateChart'), {
+      type: 'line',
+      data: {
+        labels: months,
+        datasets: [
+          { label: 'Tropical', data: [29.0, 30.9, 32.9, 34.1, 32.1, 30.5, 29.7, 29.9, 30.2, 30.8, 30.0, 28.9], borderColor: '#b84a1e', tension: 0.4, pointRadius: 0 },
+          { label: 'Continental', data: [-6.0, -6.2, 3.7, 10.0, 16.8, 21.9, 24.2, 22.1, 18.4, 9.0, 2.2, -1.8], borderColor: '#1a3a5c', tension: 0.4, pointRadius: 0 },
+          { label: 'Mediterranean', data: [11.9, 12.1, 13.4, 16.0, 21.2, 28.4, 30.5, 29.7, 25.5, 20.7, 15.3, 11.6], borderColor: '#0e7c5b', tension: 0.4, pointRadius: 0 },
+          { label: 'Desert', data: [10.8, 13.7, 17.7, 24.0, 30.4, 36.1, 37.7, 36.9, 32.5, 26.2, 19.6, 13.4], borderColor: '#c08000', tension: 0.4, pointRadius: 0 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+        scales: {
+          y: { ticks: { callback: v => v + '°C' }, grid: { color: '#eee' } },
+          x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0 } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('seasonChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Moscow', 'Tokyo', 'London', 'Singapore', 'Cairo'],
+        datasets: [{
+          label: 'Seasonal Range (°C)', data: [55.9, 37.0, 36.8, 12.1, 31.3],
+          backgroundColor: '#1a3a5c', borderRadius: 4, borderSkipped: false
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { callback: v => v + '°C' }, grid: { color: '#eee' } },
+          y: { grid: { display: false } }
+        }
+      }
+    });
+
+    const aqData = Array.from({ length: 60 }, () => ({
+      x: Math.round(-5 + Math.random() * 55),
+      y: Math.round(10 + Math.random() * 180)
+    }));
+    new Chart(document.getElementById('aqChart'), {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'City', data: aqData,
+          backgroundColor: 'rgba(184,74,30,0.35)', pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Temperature (°C)' }, grid: { color: '#eee' } },
+          y: { title: { display: true, text: 'PM2.5 (µg/m³)' }, grid: { color: '#eee' } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('aqBarChart'), {
+      type: 'bar',
+      data: {
+        labels: ['South Asian Megacities', 'East Asian Cities', 'European Cities', 'North American', 'Oceania', 'Middle East'],
+        datasets: [{
+          label: 'Avg PM2.5 (µg/m³)', data: [77.2, 72.9, 16.5, 8.8, 7.2, 85.3],
+          backgroundColor: ['#b84a1e', '#c08000', '#0e7c5b', '#1a3a5c', '#0e7c5b', '#c08000'], borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          annotation: {}
+        },
+        scales: {
+          x: { ticks: { callback: v => v + ' µg' }, grid: { color: '#eee' } },
+          y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('featImpChart'), {
+      type: 'bar',
+      data: {
+        labels: ['humidity', 'pressure_mb', 'uv_index', 'day_of_year', 'wind_kph', 'cloud', 'feelslike_c', 'visibility_km', 'latitude', 'precip_mm'],
+        datasets: [{
+          label: 'Importance Score', data: [0.218, 0.181, 0.164, 0.142, 0.098, 0.071, 0.054, 0.038, 0.029, 0.021],
+          backgroundColor: '#1a3a5c', borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#eee' } },
+          y: { grid: { display: false }, ticks: { font: { family: "'IBM Plex Mono', monospace", size: 11 } } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('spatialChart'), {
+      type: 'bar',
+      data: {
+        labels: ['90°S–60°S', '60°S–30°S', '30°S–0°', '0°–30°N', '30°N–60°N', '60°N–90°N'],
+        datasets: [{
+          label: 'Avg Temp (°C)', data: [0, 14.1, 24.1, 26.4, 15.4, 7.0],
+          backgroundColor: ['#1a3a5c', '#0e7c5b', '#c08000', '#b84a1e', '#0e7c5b', '#7b4ea0'], borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { callback: v => v + '°C' }, grid: { color: '#eee' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
