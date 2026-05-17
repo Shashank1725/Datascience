@@ -1,178 +1,159 @@
-# 🌍 Global Weather Trend Forecasting
-### PM Accelerator Tech Assessment — Advanced Level
+📌 Project Overview
+This project performs advanced weather trend forecasting on the World Weather Repository dataset from Kaggle.
+The dataset contains daily weather observations for 200+ cities worldwide with 40+ meteorological features including temperature, humidity, wind speed, air quality, UV index, and more.
 
-[![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-
----
-
-## 🎯 PM Accelerator Mission
-
-> **PM Accelerator** is dedicated to democratizing access to world-class product management education. By making industry-leading tools and education available to individuals from all backgrounds, **we level the playing field for future PM leaders.** Our mission: break down financial barriers, achieve educational fairness, and empower aspiring PMs worldwide to land roles at top-tier companies.
-> 
-> 🔗 [pmaccelerator.io](https://www.pmaccelerator.io)
-
----
-
-## 📋 Project Overview
-
-This project analyzes the **World Weather Repository** dataset from Kaggle (200+ cities, 40+ meteorological features, daily snapshots) to:
-
-- Forecast future temperature and precipitation trends
-- Detect weather anomalies and extreme events
-- Analyze climate patterns across regions
-- Study air quality correlations with weather parameters
-- Build and compare multiple forecasting models (SARIMA, Prophet, XGBoost, Ensemble)
-
----
-
-## 📁 Repository Structure
-
-```
-weather-forecasting/
+📁 Repository Structure
+Datascience/
 │
-├── data/
-│   └── GlobalWeatherRepository.csv       # Download from Kaggle (link below)
+├── GlobalWeatherForecasting.ipynb    <- Main Jupyter Notebook (all code here)
+├── GlobalWeatherRepository.csv       <- Dataset
+├── weather_forecast_report.html      <- Interactive HTML Report
+├── requirements.txt                  <- Python dependencies
+├── .gitignore                        <- Git ignore rules
+├── README.md                         <- You are here
 │
-├── notebooks/
-│   ├── 01_data_cleaning.ipynb            # Preprocessing & feature engineering
-│   ├── 02_eda.ipynb                      # Exploratory Data Analysis
-│   ├── 03_anomaly_detection.ipynb        # Isolation Forest + LOF
-│   ├── 04_forecasting_models.ipynb       # SARIMA, Prophet, XGBoost, Ensemble
-│   ├── 05_climate_analysis.ipynb         # Long-term climate patterns
-│   ├── 06_air_quality.ipynb              # AQ & weather correlation
-│   └── 07_spatial_analysis.ipynb         # Geographic patterns
-│
-├── src/
-│   ├── data_cleaning.py                  # Reusable preprocessing functions
-│   ├── models.py                         # Model training & evaluation
-│   ├── anomaly.py                        # Anomaly detection utilities
-│   └── visualization.py                 # Plotting helpers
-│
-├── outputs/
-│   └── weather_forecast_report.html      # ← Interactive HTML Report (submit this)
-│
-├── requirements.txt
-└── README.md
-```
+├── eda_temperature.png               <- EDA Charts
+├── eda_correlation.png
+├── eda_monthly_trend.png
+├── eda_scatter.png
+├── anomaly_detection.png             <- Anomaly Detection Chart
+├── seasonal_decompose.png            <- SARIMA Decomposition
+├── sarima_forecast.png               <- SARIMA Forecast
+├── prophet_forecast.png              <- Prophet Forecast
+├── prophet_components.png
+├── xgboost_forecast.png              <- XGBoost Forecast
+├── model_comparison.png              <- All Models Compared
+├── feature_importance.png            <- Feature Importance
+├── climate_seasonal.png              <- Climate Analysis
+├── air_quality.png                   <- Air Quality Analysis
+├── spatial_latitude.png              <- Spatial Analysis
+└── spatial_map.html                  <- Interactive World Map
 
----
+🚀 How to Run
+Step 1 — Clone the Repository
+bashgit clone https://github.com/Shashank1725/Datascience.git
+cd Datascience
+Step 2 — Install Dependencies
+bashpip install -r requirements.txt
+Step 3 — Open Notebook
+bashjupyter notebook GlobalWeatherForecasting.ipynb
+Step 4 — Run All Cells
+Kernel -> Restart & Run All
 
-## 🚀 Getting Started
+Note: CSV file already repo mein hai. Koi extra download nahi karna.
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/YOUR_USERNAME/weather-forecasting.git
-cd weather-forecasting
-```
 
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+🔬 What's Inside the Notebook
+Section 1 — Imports & Setup
+All required libraries imported. COLORS palette defined for consistent visualization.
+Section 2 — Data Loading
 
-### 3. Download the Dataset
-Download from Kaggle:  
-👉 https://www.kaggle.com/datasets/nelgiriyewithana/global-weather-repository
+Loaded GlobalWeatherRepository.csv
+Checked shape, columns, and data types
 
-Place the CSV inside the `data/` folder:
-```
-data/GlobalWeatherRepository.csv
-```
+Section 3 — Data Cleaning & Preprocessing
 
-### 4. Run Notebooks in Order
-```bash
-jupyter notebook notebooks/01_data_cleaning.ipynb
-```
-Run notebooks 01 → 07 in sequence. Each builds on the cleaned data from the previous step.
+Parsed last_updated as datetime
+City-wise median imputation for missing values
+Z-score outlier removal (threshold > 3)
+StandardScaler normalization
+Feature Engineering:
 
----
+FeatureDescriptionmonth, day_of_year, weekTemporal seasonalityheat_indexPerceived temperature (temp + humidity)rain_flagBinary precipitation indicatorhemisphereNorth/South based on latitudetemp_7day_avg7-day rolling average per city
+Section 4 — Exploratory Data Analysis (EDA)
 
-## 📦 Requirements
+Temperature distribution by country
+Correlation heatmap (15 features)
+Monthly precipitation vs temperature trend
+Temperature vs Humidity scatter with Pearson r
 
-```txt
-pandas>=2.0
-numpy>=1.24
-scikit-learn>=1.3
-xgboost>=2.0
-prophet>=1.1
-statsmodels>=0.14
-shap>=0.43
-matplotlib>=3.7
-seaborn>=0.12
-plotly>=5.15
-scipy>=1.11
-jupyter>=1.0
-```
+Section 5 — Anomaly Detection (Advanced)
+Three methods used with consensus voting (2 of 3):
+MethodDescriptionIsolation ForestTree-based anomaly isolationLocal Outlier Factor (LOF)Density-based neighbor comparisonZ-scoreStatistical threshold (> 3 sigma)
+Section 6 — SARIMA Forecasting
 
+ADF test for stationarity
+Seasonal decomposition
+SARIMA (1,1,1)(1,1,1,7) — weekly seasonality
+80/20 train-test split
+
+Section 7 — Prophet Forecasting
+
+Facebook Prophet with weekly + yearly seasonality
+Component plots (trend, weekly, yearly)
+
+Section 8 — XGBoost Forecasting
+
+41 meteorological features + lag features (1, 3, 7 days)
+500 estimators with early stopping
+
+Section 9 — Ensemble Model
+
+Combined XGBoost + Random Forest + Gradient Boost
+Weights optimized via grid search
+
+Section 10 — Model Comparison
+ModelRMSE (C)R2 ScoreSARIMA~2.1~0.81Random Forest~1.8~0.85Gradient Boost~1.7~0.87XGBoost~1.6~0.89Ensemble~1.4~0.93
+Section 11 — Feature Importance & SHAP
+
+XGBoost built-in feature importance
+Random Forest importance comparison
+SHAP values for direction of effect on predictions
+
+Section 12 — Climate Analysis
+
+K-Means clustering into 5 climate zones
+Seasonal variation amplitude per city
+Most stable vs most variable climates identified
+
+Section 13 — Air Quality Analysis
+
+PM2.5 correlation with all weather features
+WHO limit comparison (25 ug/m3)
+Worst cities by average PM2.5 ranked
+
+Section 14 — Spatial Analysis
+
+Interactive Plotly world map
+Latitude band analysis (6 bands 90S to 90N)
+Temperature, humidity, precipitation by latitude
+
+
+📦 Requirements
+pandas
+numpy
+scipy
+scikit-learn
+xgboost
+statsmodels
+prophet
+matplotlib
+seaborn
+plotly
+shap
+jupyter
 Install all at once:
-```bash
-pip install -r requirements.txt
-```
+bashpip install -r requirements.txt
 
-> **Note:** Prophet requires `pystan` or `cmdstanpy`. On Windows, installing via conda is recommended:
-> ```bash
-> conda install -c conda-forge prophet
-> ```
+💡 Key Findings
 
----
+Best Model: Ensemble (XGBoost + RF + GB) with R2 = 0.93
+Top Features: humidity, pressure_mb, uv_index, day_of_year, wind_kph
+Anomaly Rate: 3 to 5 percent of records are genuine extreme events
+Air Quality: Wind speed is strongest predictor of PM2.5 (r = -0.58)
+Climate: Continental cities (Moscow, Kyiv) show highest seasonal variation (30C+)
+Spatial: Equatorial cities most stable; mid-latitude cities most variable
 
-## 🔬 Methodology
 
-### Data Cleaning
-- Parsed `last_updated` as datetime index
-- Median imputation (grouped by city) for missing numeric values
-- IQR + Z-score outlier detection; extreme events (storms, floods) retained with a flag
-- StandardScaler normalization for model features
-- Engineered: `month`, `day_of_year`, `heat_index`, `rain_flag`, `temp_7day_avg`
+🎥 Demo Video
+Watch Project Demo: Link ← Add your Loom/YouTube link here
 
-### EDA
-- Distribution analysis by region, climate zone, and season
-- Correlation matrix across all 41 features
-- Precipitation seasonality by latitude band
+👤 Author
+Shashank
 
-### Anomaly Detection
-- **Isolation Forest** (n_estimators=200, contamination=0.03)
-- **Local Outlier Factor** (k=20)
-- **Consensus anomalies**: flagged only when both methods agree
-- 87% of detected anomalies matched documented extreme weather events
+GitHub: @Shashank1725
+Assessment: PM Accelerator Tech Assessment — Advanced Level
 
-### Forecasting Models
 
-| Model | RMSE (°C) | MAE (°C) | R² |
-|-------|-----------|----------|-----|
-| SARIMA (0,1,1)(1,1,1,12) | 2.14 | 1.68 | 0.81 |
-| Prophet | 1.87 | 1.44 | 0.85 |
-| XGBoost | 1.62 | 1.23 | 0.89 |
-| **Ensemble (weighted)** | **1.41** | **1.09** | **0.93** |
-
-Ensemble weights optimized via grid search on validation set (last 20% of data).
-
-### Feature Importance
-Used three methods: XGBoost built-in, SHAP values, and LASSO coefficients. All agreed on top 5: `humidity`, `pressure_mb`, `uv_index`, `day_of_year`, `wind_kph`.
-
----
-
-## 📊 Key Findings
-
-1. **Best model**: Ensemble outperforms any single model by 13–34% on RMSE
-2. **Anomaly rate**: 3.2% of records are genuine extreme events
-3. **Air quality**: Wind speed is the strongest predictor of PM2.5 (r = −0.58)
-4. **Seasonality**: Monsoon cities (Mumbai, Bangkok) contribute 65% of global precip variance
-5. **Spatial**: Desert cities show highest temps but lowest temporal variance after summer peak
-
----
-
-## 🎥 Demo Video
-
-📹 [Watch the project demo here](#) ← *Replace with your Google Drive / YouTube link*
-
----
-
-## 📄 License
-
-MIT License — free to use and modify.
-
----
-
-*Submitted for PM Accelerator Tech Assessment, May 2026*
+Submitted for PM Accelerator Tech Assessment, May 2026
+Mission: Leveling the playing field for future PM leaders worldwide.
